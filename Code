@@ -1,0 +1,223 @@
+#include <iostream>
+#include <cstdio>
+#include <stdlib.h>
+#include<string.h>
+#include<fstream>
+#include<ctype.h>
+ 
+using namespace std;
+typedef struct contact
+{
+    char name[20];
+    int phone;
+}CONTACT;
+
+//prototypes
+void display(const CONTACT list[],int entries);
+
+int store(char FILENAME[],CONTACT c[10]);
+
+void insertion_sort_name (CONTACT array[], int size);
+
+void insertion_sort_num (CONTACT array[], int size);
+
+void sort(CONTACT c[]);
+
+void write(char FILENAME[],CONTACT c[],int entries);
+
+void smallify(char *a);
+//definitions
+void insertion_sort_num (CONTACT a[], int size)
+{
+    int i,j;
+    CONTACT temp;
+    for(i=1;i<size;i++)
+    {
+      temp=a[i];
+      j=i-1;
+      while((temp.phone<(a[j].phone))&&(j>=0))
+      {
+      a[j+1]=a[j];
+          j=j-1;
+      }
+      a[j+1]=temp;
+   }
+}
+void insertion_sort_name (CONTACT array[], int size)
+{
+    int i;
+    CONTACT c;
+    for (i = 0; i < size; i++)
+    {
+        int j;
+        for (j = i; j < size; j++)
+        {
+            if (strcmpi((array[i].name),(array[j].name)) > 0)
+           {
+                c = array[i];
+                array[i]= array[j];
+                array[j]=c;
+            }
+        }
+    }
+}
+int store(char FILENAME[],CONTACT c[])
+{
+	fstream fileio(FILENAME);
+	if(!fileio.is_open())
+	{
+		cout<<"file not open";
+		exit(0);
+	}
+	char x[20];
+	int y,n,i=0;
+	while(!fileio.eof())
+	{
+		fileio>>x>>y;
+		strcpy(c[i].name,x);
+		c[i].phone=y;
+		i++;
+	}
+	return (i);
+	fileio.close();
+}
+void display(const CONTACT list[],int entries)
+{
+    int n;
+    for(n=0;n<entries;n++)
+    {
+        cout<<list[n].name<<"==>"<<list[n].phone<<endl;
+    }
+	cout<<endl;
+}
+void sort(CONTACT c[],int entries)
+{
+    int ch;
+    cout<<"\nPlease enter 1 for Sorting by Name or 2 for for sorting by Number\n\n";
+    cin>>ch;
+    switch(ch)
+    {
+    case 1:
+        {
+            insertion_sort_name(c,entries);
+            break;
+        }
+ 
+    case 2:
+        {
+            insertion_sort_num(c,entries);
+            break;
+        }
+ 
+    default:    cout<<"wrong choice";
+ 
+    }
+}
+void write(char FILENAME[],CONTACT c[],int entries)
+{
+	int n;char ch;
+	fstream fileio("d.txt");
+	cout<<"do you want to write changes?(Y/N)";
+    while(1)
+    {
+        cin>>ch;
+        if((ch == 'y')||(ch=='Y'))
+        {
+                if(!fileio.is_open())
+				{
+					cout<<"file not open";
+					exit(0);
+				}
+				for(n=0;n<(entries-1);n++)
+				{
+					fileio<<c[n].name<<" "<<c[n].phone<<endl;
+				}
+				fileio<<c[n].name<<" "<<c[n].phone;
+				return ;
+        }
+        else
+        {
+            if((ch=='n')||(ch=='N'))
+                {
+                    return ;
+                }
+                else{
+                    cout<<"wrong choice,Please Re-enter choice:\t";
+                }
+        }
+    }
+	fileio.close();
+}
+void query(CONTACT list[])
+{
+	char q[40],temp[20];int z;
+	cout<<endl<<"Enter Query"<<"\t";
+	fflush(stdin);
+	gets(q);
+	smallify(q);
+	cout<<endl;
+	for(int i=0;i<10;i++)
+	{
+		strcpy(temp,list[i].name);
+		smallify(temp);
+		char* p=strstr(q,temp);
+		if(p!=NULL)
+		{
+			cout<<list[i].name<<"==>"<<list[i].phone<<endl;
+			return;
+		}
+		else{
+			z= sprintf(temp,"%d",list[i].phone);
+			char* p=strstr(q,temp);
+			if(p!=NULL)
+			{
+				cout<<list[i].phone<<"==>"<<list[i].name<<endl;
+				return;
+			}
+		}
+	}
+	cout<<q<<" Does not exist";
+	
+}
+void smallify(char *a)
+{
+	for(int i=0;i<=strlen(a);i++)
+	{
+		if(isalpha(a[i]))//tolower if a[i] is char
+			a[i]=tolower(a[i]);
+	}
+}
+//main
+int main()
+{
+    CONTACT list[20];
+    char FILENAME[20];
+	strcpy(FILENAME,"d.txt");
+    int entries,ch;
+    entries=store(FILENAME,list);
+    cout<<"\nStored data is:"<<endl;
+    display(list,entries);
+	for(;;)
+	{
+		cout<<endl<<"-----------------------------\n1.Sort\n2.Query\n3.Exit\n-----------------------------"<<endl<<endl;
+		cin>>ch;
+		switch(ch)
+		{
+			case 1:
+			{
+				sort(list,entries);
+				cout<<"\nSorted list is:"<<endl;
+				display(list,entries);
+				write(FILENAME,list,entries);
+				break;
+			}
+			
+			case 2:query(list);break;
+			case 3:exit(0);
+			default: cout<<endl<<"LOOK AT THE MENU! -_-"<<endl;
+			
+
+		}
+	}
+	return 0;
+}
